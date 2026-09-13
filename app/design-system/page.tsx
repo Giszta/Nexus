@@ -8,6 +8,23 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
 
 export default function DesignSystemPage() {
   return (
@@ -56,6 +73,62 @@ export default function DesignSystemPage() {
           </CardContent>
         </Card>
       </section>
+      <section className="space-y-3">
+  <h2 className="text-sm font-medium text-muted-foreground">Dialog</h2>
+  <Dialog>
+    <DialogTrigger asChild>
+      <Button variant="outline">Otwórz zgłoszenie</Button>
+    </DialogTrigger>
+    <DialogContent>
+      <DialogHeader>
+        <DialogTitle>Ticket #4821</DialogTitle>
+        <DialogDescription>
+          Czy na pewno chcesz zaakceptować sugestię AI dla tego zgłoszenia?
+        </DialogDescription>
+      </DialogHeader>
+      <DialogFooter>
+        <Button variant="outline">Anuluj</Button>
+        <Button>Akceptuj</Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
+</section>
+
+<section className="space-y-3">
+  <h2 className="text-sm font-medium text-muted-foreground">Table</h2>
+  <Table>
+    <TableHeader>
+      <TableRow>
+        <TableHead>ID</TableHead>
+        <TableHead>Tytuł</TableHead>
+        <TableHead>Priorytet</TableHead>
+        <TableHead>Status</TableHead>
+      </TableRow>
+    </TableHeader>
+    <TableBody>
+      <TableRow>
+        <TableCell>#4821</TableCell>
+        <TableCell>Door hinge problem</TableCell>
+        <TableCell>
+          <Badge variant="secondary">Medium</Badge>
+        </TableCell>
+        <TableCell>
+          <Badge variant="outline">Open</Badge>
+        </TableCell>
+      </TableRow>
+      <TableRow>
+        <TableCell>#3912</TableCell>
+        <TableCell>Login page 500 error</TableCell>
+        <TableCell>
+          <Badge variant="destructive">High</Badge>
+        </TableCell>
+        <TableCell>
+          <Badge>Resolved</Badge>
+        </TableCell>
+      </TableRow>
+    </TableBody>
+  </Table>
+</section>
     </div>
   );
 }
