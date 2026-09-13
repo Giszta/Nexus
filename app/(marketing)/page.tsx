@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 export default function HomePage() {
@@ -7,9 +8,9 @@ export default function HomePage() {
       <p className="max-w-md text-muted-foreground">
         AI Operations & Knowledge Platform — projekt w budowie.
       </p>
-      <Button asChild>
-        <a href="/dashboard">Wejdź do aplikacji</a>
-      </Button>
+<Button asChild>
+  <Link href="/dashboard">Wejdź do aplikacji</Link>
+</Button>
     </main>
   );
 }
