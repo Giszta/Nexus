@@ -12,19 +12,28 @@ import {
 } from "lucide-react";
 
 const navItems = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Tickets", href: "/tickets", icon: Ticket },
-  { label: "Knowledge Base", href: "/knowledge-base", icon: BookOpen },
-  { label: "Analytics", href: "/analytics", icon: BarChart3 },
-  { label: "Settings", href: "/settings", icon: Settings },
+  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, roles: ["ADMIN", "MANAGER", "AGENT", "VIEWER"] },
+  { label: "Tickets", href: "/tickets", icon: Ticket, roles: ["ADMIN", "MANAGER", "AGENT", "VIEWER"] },
+  { label: "Knowledge Base", href: "/knowledge-base", icon: BookOpen, roles: ["ADMIN", "MANAGER", "AGENT", "VIEWER"] },
+  { label: "Analytics", href: "/analytics", icon: BarChart3, roles: ["ADMIN", "MANAGER", "AGENT", "VIEWER"] },
+  { label: "Settings", href: "/settings", icon: Settings, roles: ["ADMIN", "MANAGER"] },
 ];
 
-export function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
+export function NavLinks({
+  role,
+  onNavigate,
+}: {
+  role?: string;
+  onNavigate?: () => void;
+}) {
   const pathname = usePathname();
+  const visibleItems = navItems.filter((item) =>
+    role ? item.roles.includes(role) : true
+  );
 
   return (
     <nav className="flex-1 space-y-1 p-3">
-      {navItems.map((item) => {
+      {visibleItems.map((item) => {
         const isActive = pathname === item.href;
         const Icon = item.icon;
         return (
@@ -48,13 +57,13 @@ export function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   );
 }
 
-export function Sidebar() {
+export function Sidebar({ role }: { role?: string }) {
   return (
     <aside className="hidden md:flex w-60 shrink-0 flex-col border-r bg-background">
       <div className="flex h-14 items-center border-b px-4">
         <span className="font-semibold">NEXUS</span>
       </div>
-      <NavLinks />
+      <NavLinks role={role} />
     </aside>
   );
 }
