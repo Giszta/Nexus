@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
-import Database from "better-sqlite3";
+import { prisma } from "@/lib/prisma";
+import { UserRepository } from "@/repositories/user-repository";
 
 const testUsers = [
   { email: "admin@nexus.dev", name: "Admin User", role: "ADMIN" },
@@ -11,8 +12,6 @@ const testUsers = [
 const PASSWORD = "Password123!";
 
 async function seed() {
-      console.log("Skrypt wystartował");
-  console.log("BETTER_AUTH_SECRET ustawiony:", !!process.env.BETTER_AUTH_SECRET);
   for (const user of testUsers) {
     try {
       await auth.api.signUpEmail({
@@ -28,20 +27,17 @@ async function seed() {
     }
   }
 
-  // signUpEmail zawsze tworzy użytkownika z domyślną rolą AGENT
-  // (bo pole role ma input: false) — teraz nadpisujemy rolę
-  // bezpośrednio w bazie, jako operacja administracyjna.
-  const db = new Database("dev.db");
   for (const user of testUsers) {
-    db.prepare("UPDATE user SET role = ? WHERE email = ?").run(
-      user.role,
-      user.email
-    );
+    await prisma.user.update({
+      where: { email: user.email },
+      data: { role: user.role },
+    });
   }
-  db.close();
 
-  console.log("\nGotowe. Konta testowe (hasło dla wszystkich: Password123!):");
-  testUsers.forEach((u) => console.log(`  ${u.role.padEnd(8)} ${u.email}`));
+
+console.log("\nGotowe. Konta w bazie (hasło dla wszystkich: Password123!):");
+const allUsers = await UserRepository.listAll();
+allUsers.forEach((u) => console.log(`  ${u.role.padEnd(8)} ${u.email}`));
 }
 
 seed()
