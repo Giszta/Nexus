@@ -44,13 +44,25 @@ export const TicketRepository = {
     });
   },
 
-  async create(data: {
-    title: string;
-    description: string;
-    priority?: TicketPriority;
-    category?: TicketCategory;
-    createdById: string;
-  }) {
-    return prisma.ticket.create({ data });
-  },
+async create(data: {
+  title: string;
+  description: string;
+  priority?: TicketPriority;
+  category?: TicketCategory;
+  createdById: string;
+}) {
+  return prisma.$transaction(async (tx) => {
+    const ticket = await tx.ticket.create({ data });
+
+    await tx.ticketActivity.create({
+      data: {
+        ticketId: ticket.id,
+        actorId: data.createdById,
+        type: "CREATED",
+      },
+    });
+
+    return ticket;
+  });
+},
 };
