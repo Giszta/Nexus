@@ -6,6 +6,10 @@ import { getServerSession } from "@/lib/session";
 import { TicketRepository } from "@/repositories/ticket-repository";
 import { createTicketSchema } from "@/schemas/ticket";
 
+import { prisma } from "@/lib/prisma";
+import type { TicketStatus } from "@prisma/client";
+import { UserRepository } from "@/repositories/user-repository";
+
 export async function createTicket(formData: FormData) {
   const session = await getServerSession();
   if (!session) redirect("/login");
@@ -33,4 +37,74 @@ export async function createTicket(formData: FormData) {
 
   revalidatePath("/tickets");
   redirect(`/tickets/${ticket.id}`);
+}
+
+export async function updateTicketStatus(
+  ticketId: string,
+  newStatus: TicketStatus
+) {
+  const session = await getServerSession();
+  if (!session) redirect("/login");
+
+  const role = (session.user as { role?: string }).role;
+  if (role === "VIEWER") {
+    throw new Error("Brak uprawnień do zmiany statusu.");
+  }
+
+  const ticket = await TicketRepository.findById(ticketId);
+  if (!ticket) throw new Error("Nie znaleziono ticketu.");
+
+  await prisma.$transaction(async (tx) => {
+    await tx.ticket.update({
+      where: { id: ticketId },
+      data: { status: newStatus },
+    });
+
+    await tx.ticketActivity.create({
+      data: {
+        ticketId,
+        actorId: session.user.id,
+        type: "STATUS_CHANGED",
+        fromValue: ticket.status,
+        toValue: newStatus,
+      },
+    });
+  });
+
+  revalidatePath(`/tickets/${ticketId}`);
+}
+
+export async function assignTicket(ticketId: string, assigneeId: string) {
+  const session = await getServerSession();
+  if (!session) redirect("/login");
+
+  const role = (session.user as { role?: string }).role;
+  if (role !== "ADMIN" && role !== "MANAGER") {
+    throw new Error("Brak uprawnień do przypisywania zgłoszeń.");
+  }
+
+  const ticket = await TicketRepository.findById(ticketId);
+  if (!ticket) throw new Error("Nie znaleziono ticketu.");
+
+  const newAssignee = await UserRepository.findById(assigneeId);
+  if (!newAssignee) throw new Error("Nie znaleziono użytkownika.");
+
+  await prisma.$transaction(async (tx) => {
+    await tx.ticket.update({
+      where: { id: ticketId },
+      data: { assignedToId: assigneeId },
+    });
+
+    await tx.ticketActivity.create({
+      data: {
+        ticketId,
+        actorId: session.user.id,
+        type: "ASSIGNED",
+        fromValue: ticket.assignedTo?.name ?? "Nieprzypisany",
+        toValue: newAssignee.name,
+      },
+    });
+  });
+
+  revalidatePath(`/tickets/${ticketId}`);
 }

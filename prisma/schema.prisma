@@ -15,6 +15,7 @@ model User {
   role          String    @default("AGENT")
   createdAt     DateTime
   updatedAt     DateTime
+    ticketActivities TicketActivity[]
 
   sessions      Session[]
   accounts      Account[]
@@ -99,6 +100,7 @@ model Ticket {
   status      TicketStatus    @default(OPEN)
   priority    TicketPriority?
   category    TicketCategory?
+  activities TicketActivity[]
 
   createdById String
   createdBy   User            @relation("TicketsCreated", fields: [createdById], references: [id])
@@ -112,4 +114,29 @@ model Ticket {
   @@index([status])
   @@index([createdById])
   @@map("ticket")
+}
+
+enum TicketActivityType {
+  CREATED
+  STATUS_CHANGED
+  ASSIGNED
+  PRIORITY_CHANGED
+}
+
+model TicketActivity {
+  id        String             @id @default(cuid())
+  type      TicketActivityType
+  fromValue String?
+  toValue   String?
+
+  ticketId  String
+  ticket    Ticket             @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  actorId   String
+  actor     User               @relation(fields: [actorId], references: [id])
+
+  createdAt DateTime           @default(now())
+
+  @@index([ticketId])
+  @@map("ticket_activity")
 }

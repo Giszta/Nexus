@@ -17,4 +17,10 @@ export const UserRepository = {
   async listAll() {
     return prisma.user.findMany({ orderBy: { createdAt: "asc" } });
   },
+  async findAssignable() {
+  return prisma.user.findMany({
+    where: { role: { in: ["AGENT", "MANAGER"] } },
+    orderBy: { name: "asc" },
+  });
+},
 };
