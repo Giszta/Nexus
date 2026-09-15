@@ -23,6 +23,8 @@ model User {
   ticketsCreated  Ticket[] @relation("TicketsCreated")
   ticketsAssigned Ticket[] @relation("TicketsAssigned")
   
+  knowledgeDocuments KnowledgeDocument[]
+
   @@map("user")
 }
 
@@ -185,4 +187,35 @@ model AISuggestion {
 
   @@index([ticketId])
   @@map("ai_suggestion")
+}
+
+enum DocumentStatus {
+  UPLOADING
+  PROCESSING
+  INDEXING
+  READY
+  FAILED
+}
+
+enum DocumentFileType {
+  TXT
+  MARKDOWN
+}
+
+model KnowledgeDocument {
+  id           String           @id @default(cuid())
+  title        String
+  content      String
+  fileType     DocumentFileType
+  status       DocumentStatus   @default(UPLOADING)
+  fileSizeBytes Int
+
+  uploadedById String
+  uploadedBy   User             @relation(fields: [uploadedById], references: [id])
+
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@index([status])
+  @@map("knowledge_document")
 }
