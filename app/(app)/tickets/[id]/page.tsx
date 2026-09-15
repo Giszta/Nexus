@@ -13,7 +13,7 @@ import {
 import { TicketStatusSelect } from "@/components/tickets/ticket-status-select";
 import { TicketAssignSelect } from "@/components/tickets/ticket-assign-select";
 import { prisma } from "@/lib/prisma";
-import { TicketAIAnalysis } from "../ticket-ai-analysis";
+import { TicketAIAnalysis } from "@/components/tickets/ticket-ai-analysis";
 
 const activityLabels: Record<string, string> = {
   CREATED: "utworzył(a) zgłoszenie",
