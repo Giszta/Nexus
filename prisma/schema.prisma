@@ -15,7 +15,7 @@ model User {
   role          String    @default("AGENT")
   createdAt     DateTime
   updatedAt     DateTime
-    ticketActivities TicketActivity[]
+  ticketActivities TicketActivity[]
 
   sessions      Session[]
   accounts      Account[]
@@ -114,6 +114,8 @@ model Ticket {
   @@index([status])
   @@index([createdById])
   @@map("ticket")
+
+  analyses AIAnalysis[]
 }
 
 enum TicketActivityType {
@@ -139,4 +141,27 @@ model TicketActivity {
 
   @@index([ticketId])
   @@map("ticket_activity")
+}
+
+model AIAnalysis {
+  id            String          @id @default(cuid())
+
+  ticketId      String
+  ticket        Ticket          @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  model         String
+  promptVersion String
+  category      TicketCategory?
+  priority      TicketPriority?
+  confidence    Float
+  reasoning     String?
+
+  latencyMs     Int
+  inputTokens   Int?
+  outputTokens  Int?
+
+  createdAt     DateTime        @default(now())
+
+  @@index([ticketId])
+  @@map("ai_analysis")
 }

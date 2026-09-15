@@ -10,6 +10,9 @@ import { prisma } from "@/lib/prisma";
 import type { TicketStatus } from "@prisma/client";
 import { UserRepository } from "@/repositories/user-repository";
 
+import { AIService } from "@/lib/ai/ai-service";
+
+
 export async function createTicket(formData: FormData) {
   const session = await getServerSession();
   if (!session) redirect("/login");
@@ -104,6 +107,38 @@ export async function assignTicket(ticketId: string, assigneeId: string) {
         toValue: newAssignee.name,
       },
     });
+  });
+
+  revalidatePath(`/tickets/${ticketId}`);
+}
+
+export async function analyzeTicket(ticketId: string) {
+  const session = await getServerSession();
+  if (!session) redirect("/login");
+
+  const role = (session.user as { role?: string }).role;
+  if (role === "VIEWER") {
+    throw new Error("Brak uprawnień do analizy AI.");
+  }
+
+  const ticket = await TicketRepository.findById(ticketId);
+  if (!ticket) throw new Error("Nie znaleziono ticketu.");
+
+  const result = await AIService.classifyTicket(ticket.title, ticket.description);
+
+  await prisma.aIAnalysis.create({
+    data: {
+      ticketId,
+      model: result.model,
+      promptVersion: result.promptVersion,
+      category: result.category,
+      priority: result.priority,
+      confidence: result.confidence,
+      reasoning: result.reasoning,
+      latencyMs: result.latencyMs,
+      inputTokens: result.inputTokens,
+      outputTokens: result.outputTokens,
+    },
   });
 
   revalidatePath(`/tickets/${ticketId}`);

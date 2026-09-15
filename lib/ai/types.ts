@@ -1,0 +1,20 @@
+import type { TicketCategory, TicketPriority } from "@prisma/client";
+
+export type ClassificationResult = {
+  category: TicketCategory;
+  priority: TicketPriority;
+  confidence: number;
+  reasoning: string;
+  model: string;
+  promptVersion: string;
+  latencyMs: number;
+  inputTokens?: number;
+  outputTokens?: number;
+};
+
+export interface AIProvider {
+  classifyTicket(
+    title: string,
+    description: string
+  ): Promise<ClassificationResult>;
+}
