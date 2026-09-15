@@ -14,7 +14,7 @@ import { TicketStatusSelect } from "@/components/tickets/ticket-status-select";
 import { TicketAssignSelect } from "@/components/tickets/ticket-assign-select";
 import { prisma } from "@/lib/prisma";
 import { TicketAIAnalysis } from "@/components/tickets/ticket-ai-analysis";
-
+import { TicketSuggestion } from "@/components/tickets/ticket-suggestion";
 const activityLabels: Record<string, string> = {
   CREATED: "utworzył(a) zgłoszenie",
   STATUS_CHANGED: "zmienił(a) status",
@@ -31,15 +31,20 @@ export default async function TicketDetailsPage({
   const session = await getServerSession();
   const role = (session?.user as { role?: string })?.role;
 
-const [ticket, activities, assignableUsers, latestAnalysis] = await Promise.all([
-  TicketRepository.findById(id),
-  TicketActivityRepository.listForTicket(id),
-  UserRepository.findAssignable(),
-  prisma.aIAnalysis.findFirst({
-    where: { ticketId: id },
-    orderBy: { createdAt: "desc" },
-  }),
-]);
+const [ticket, activities, assignableUsers, latestAnalysis, latestSuggestion] =
+  await Promise.all([
+    TicketRepository.findById(id),
+    TicketActivityRepository.listForTicket(id),
+    UserRepository.findAssignable(),
+    prisma.aIAnalysis.findFirst({
+      where: { ticketId: id },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.aISuggestion.findFirst({
+      where: { ticketId: id },
+      orderBy: { createdAt: "desc" },
+    }),
+  ]);
 
 if (!ticket) {
   notFound();
@@ -76,7 +81,8 @@ const canAssign = role === "ADMIN" || role === "MANAGER";
         </CardContent>
         
       </Card>
-<TicketAIAnalysis ticketId={ticket.id} analysis={latestAnalysis} />
+        <TicketAIAnalysis ticketId={ticket.id} analysis={latestAnalysis} />
+        <TicketSuggestion ticketId={ticket.id} suggestion={latestSuggestion} />
       <div className="grid grid-cols-2 gap-4 text-sm">
         <div>
           <p className="text-muted-foreground">Zgłosił</p>

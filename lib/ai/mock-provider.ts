@@ -1,4 +1,5 @@
-import type { AIProvider, ClassificationResult } from "./types";
+import { responseSuggestionPrompt } from "@/prompts/response-suggestion";
+import type { AIProvider, ClassificationResult, SuggestionResult } from "./types";
 import { ticketClassificationPrompt } from "@/prompts/ticket-classification";
 
 export class MockAIProvider implements AIProvider {
@@ -35,4 +36,18 @@ export class MockAIProvider implements AIProvider {
       latencyMs: Date.now() - start,
     };
   }
+  async suggestResponse(
+  title: string,
+  description: string
+): Promise<SuggestionResult> {
+  const start = Date.now();
+  await new Promise((resolve) => setTimeout(resolve, 300));
+
+  return {
+    content: `Dziękujemy za zgłoszenie "${title}". Przeanalizujemy opisany problem i wrócimy do Ciebie z odpowiedzią najszybciej, jak to możliwe. [Odpowiedź wygenerowana przez MockAIProvider]`,
+    model: "mock-provider",
+    promptVersion: responseSuggestionPrompt.version,
+    latencyMs: Date.now() - start,
+  };
+}
 }
