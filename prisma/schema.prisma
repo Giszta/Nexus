@@ -116,6 +116,7 @@ model Ticket {
   @@map("ticket")
 
   analyses AIAnalysis[]
+  suggestions AISuggestion[]
 }
 
 enum TicketActivityType {
@@ -164,4 +165,24 @@ model AIAnalysis {
 
   @@index([ticketId])
   @@map("ai_analysis")
+}
+
+model AISuggestion {
+  id            String   @id @default(cuid())
+
+  ticketId      String
+  ticket        Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  content       String
+  model         String
+  promptVersion String
+
+  latencyMs     Int
+  inputTokens   Int?
+  outputTokens  Int?
+
+  createdAt     DateTime @default(now())
+
+  @@index([ticketId])
+  @@map("ai_suggestion")
 }

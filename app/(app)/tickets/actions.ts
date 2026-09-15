@@ -143,3 +143,32 @@ export async function analyzeTicket(ticketId: string) {
 
   revalidatePath(`/tickets/${ticketId}`);
 }
+
+export async function generateSuggestion(ticketId: string) {
+  const session = await getServerSession();
+  if (!session) redirect("/login");
+
+  const role = (session.user as { role?: string }).role;
+  if (role === "VIEWER") {
+    throw new Error("Brak uprawnień do generowania sugestii AI.");
+  }
+
+  const ticket = await TicketRepository.findById(ticketId);
+  if (!ticket) throw new Error("Nie znaleziono ticketu.");
+
+  const result = await AIService.suggestResponse(ticket.title, ticket.description);
+
+  await prisma.aISuggestion.create({
+    data: {
+      ticketId,
+      content: result.content,
+      model: result.model,
+      promptVersion: result.promptVersion,
+      latencyMs: result.latencyMs,
+      inputTokens: result.inputTokens,
+      outputTokens: result.outputTokens,
+    },
+  });
+
+  revalidatePath(`/tickets/${ticketId}`);
+}
