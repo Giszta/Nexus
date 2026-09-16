@@ -48,7 +48,7 @@ export const KnowledgeDocumentRepository = {
     uploadedById: string;
   }) {
     return prisma.knowledgeDocument.create({
-      data: { ...data, status: "READY" },
+      data: { ...data, status: "PROCESSING" },
     });
   },
 
