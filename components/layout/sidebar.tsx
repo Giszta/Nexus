@@ -9,6 +9,7 @@ import {
   BookOpen,
   BarChart3,
   Settings,
+  Search,
 } from "lucide-react";
 
 const navItems = [
@@ -17,6 +18,7 @@ const navItems = [
   { label: "Knowledge Base", href: "/knowledge-base", icon: BookOpen, roles: ["ADMIN", "MANAGER", "AGENT", "VIEWER"] },
   { label: "Analytics", href: "/analytics", icon: BarChart3, roles: ["ADMIN", "MANAGER", "AGENT", "VIEWER"] },
   { label: "Settings", href: "/settings", icon: Settings, roles: ["ADMIN", "MANAGER"] },
+  { label: "Search KB", href: "/knowledge-base/search", icon: Search, roles: ["ADMIN", "MANAGER", "AGENT", "VIEWER"] },
 ];
 
 export function NavLinks({

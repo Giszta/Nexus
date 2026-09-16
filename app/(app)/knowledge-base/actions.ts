@@ -10,6 +10,7 @@ import {
   ALLOWED_EXTENSIONS,
   ALLOWED_MIME_TYPES,
 } from "@/schemas/knowledge-document";
+import { indexDocument } from "@/lib/rag/index-document";
 
 export async function uploadDocument(formData: FormData) {
   const session = await getServerSession();
@@ -65,6 +66,8 @@ export async function uploadDocument(formData: FormData) {
     uploadedById: session.user.id,
   });
 
+  await indexDocument(document.id, content);
+  
   revalidatePath("/knowledge-base");
   redirect(`/knowledge-base/${document.id}`);
 }

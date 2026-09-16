@@ -218,4 +218,21 @@ model KnowledgeDocument {
 
   @@index([status])
   @@map("knowledge_document")
+
+  chunks KnowledgeChunk[]
+}
+
+model KnowledgeChunk {
+  id         String              @id @default(cuid())
+  content    String
+  chunkIndex Int
+  embedding  Unsupported("vector(1024)")?
+
+  documentId String
+  document   KnowledgeDocument   @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  createdAt  DateTime            @default(now())
+
+  @@index([documentId])
+  @@map("knowledge_chunk")
 }
