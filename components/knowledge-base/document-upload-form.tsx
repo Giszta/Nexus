@@ -32,9 +32,9 @@ export function DocumentUploadForm() {
 
       <div className="space-y-2">
         <label htmlFor="file" className="text-sm font-medium">
-          Plik (.txt lub .md, maks. 500 KB)
-        </label>
-        <Input id="file" name="file" type="file" accept=".txt,.md" />
+  Plik (.txt, .md lub .pdf)
+</label>
+<Input id="file" name="file" type="file" accept=".txt,.md,.pdf" />
         {state?.error?.file && (
           <p className="text-sm text-destructive">{state.error.file[0]}</p>
         )}

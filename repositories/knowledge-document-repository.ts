@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import type { DocumentStatus } from "@prisma/client";
+import type { DocumentFileType, DocumentStatus } from "@prisma/client";
 
 type ListParams = {
   page?: number;
@@ -40,13 +40,14 @@ export const KnowledgeDocumentRepository = {
     });
   },
 
-  async create(data: {
-    title: string;
-    content: string;
-    fileType: "TXT" | "MARKDOWN";
-    fileSizeBytes: number;
-    uploadedById: string;
-  }) {
+
+async create(data: {
+  title: string;
+  content: string;
+  fileType: DocumentFileType;
+  fileSizeBytes: number;
+  uploadedById: string;
+}) {
     return prisma.knowledgeDocument.create({
       data: { ...data, status: "PROCESSING" },
     });
