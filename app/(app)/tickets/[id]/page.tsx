@@ -20,6 +20,7 @@ const activityLabels: Record<string, string> = {
   STATUS_CHANGED: "zmienił(a) status",
   ASSIGNED: "przypisał(a) zgłoszenie",
   PRIORITY_CHANGED: "zmienił(a) priorytet",
+  CATEGORY_CHANGED: "zmienił(a) kategorię",
 };
 
 export default async function TicketDetailsPage({
@@ -46,6 +47,18 @@ const [ticket, activities, assignableUsers, latestAnalysis, latestSuggestion] =
       include: { sources: true },
     }),
   ]);
+
+  const analysisFeedback = latestAnalysis
+  ? await prisma.aIFeedback.findFirst({
+      where: { targetType: "ANALYSIS", targetId: latestAnalysis.id },
+    })
+  : null;
+
+const suggestionFeedback = latestSuggestion
+  ? await prisma.aIFeedback.findFirst({
+      where: { targetType: "SUGGESTION", targetId: latestSuggestion.id },
+    })
+  : null;
 
 if (!ticket) {
   notFound();
@@ -82,8 +95,16 @@ const canAssign = role === "ADMIN" || role === "MANAGER";
         </CardContent>
         
       </Card>
-        <TicketAIAnalysis ticketId={ticket.id} analysis={latestAnalysis} />
-        <TicketSuggestion ticketId={ticket.id} suggestion={latestSuggestion} />
+<TicketAIAnalysis
+  ticketId={ticket.id}
+  analysis={latestAnalysis}
+  feedback={analysisFeedback}
+/>
+<TicketSuggestion
+  ticketId={ticket.id}
+  suggestion={latestSuggestion}
+  feedback={suggestionFeedback}
+/>
       <div className="grid grid-cols-2 gap-4 text-sm">
         <div>
           <p className="text-muted-foreground">Zgłosił</p>

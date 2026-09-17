@@ -1,26 +1,55 @@
 "use client";
 
-import { useTransition } from "react";
-import { generateSuggestion } from "@/app/(app)/tickets/actions";
+import { useState, useTransition } from "react";
+import { generateSuggestion, reviewSuggestion } from "@/app/(app)/tickets/actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { MessageSquareText, FileText } from "lucide-react";
-import type { AISuggestion, AISuggestionSource } from "@prisma/client";
+import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { MessageSquareText, FileText, Check, X, Pencil } from "lucide-react";
+import type { AISuggestion, AISuggestionSource, AIFeedback } from "@prisma/client";
 
 type SuggestionWithSources = AISuggestion & { sources: AISuggestionSource[] };
 
 export function TicketSuggestion({
   ticketId,
   suggestion,
+  feedback,
 }: {
   ticketId: string;
   suggestion: SuggestionWithSources | null;
+  feedback: AIFeedback | null;
 }) {
   const [isPending, startTransition] = useTransition();
+  const [editOpen, setEditOpen] = useState(false);
+  const [editedContent, setEditedContent] = useState(suggestion?.content ?? "");
 
   function handleGenerate() {
     startTransition(() => {
       generateSuggestion(ticketId);
+    });
+  }
+
+  function handleDecision(decision: "ACCEPTED" | "REJECTED") {
+    if (!suggestion) return;
+    startTransition(() => {
+      reviewSuggestion(ticketId, suggestion.id, decision);
+    });
+  }
+
+  function handleSaveEdit() {
+    if (!suggestion) return;
+    startTransition(() => {
+      reviewSuggestion(ticketId, suggestion.id, "EDITED", editedContent);
+      setEditOpen(false);
     });
   }
 
@@ -45,10 +74,7 @@ export function TicketSuggestion({
                   <FileText className="mt-0.5 size-3 shrink-0 text-muted-foreground" />
                   <div>
                     <span className="font-medium">{source.documentTitle}</span>
-                    <span className="text-muted-foreground">
-                      {" "}
-                      (dystans: {source.distance.toFixed(3)})
-                    </span>
+                    <span className="text-muted-foreground"> (dystans: {source.distance.toFixed(3)})</span>
                   </div>
                 </div>
               ))}
@@ -59,10 +85,52 @@ export function TicketSuggestion({
             </p>
           )}
 
+          {feedback ? (
+            <div className="border-t pt-3">
+              <Badge variant="outline">
+                {feedback.decision === "ACCEPTED" && "Zaakceptowano"}
+                {feedback.decision === "EDITED" && "Edytowano przed wysłaniem"}
+                {feedback.decision === "REJECTED" && "Odrzucono"}
+              </Badge>
+              {feedback.decision === "EDITED" && feedback.editedContent && (
+                <p className="mt-2 whitespace-pre-wrap text-muted-foreground">
+                  {feedback.editedContent}
+                </p>
+              )}
+            </div>
+          ) : (
+            <div className="flex gap-2 border-t pt-3">
+              <Button size="sm" onClick={() => handleDecision("ACCEPTED")} disabled={isPending}>
+                <Check className="size-4" /> Akceptuj
+              </Button>
+              <Dialog open={editOpen} onOpenChange={setEditOpen}>
+                <DialogTrigger asChild>
+                  <Button size="sm" variant="outline" disabled={isPending}>
+                    <Pencil className="size-4" /> Edytuj
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Popraw sugerowaną odpowiedź</DialogTitle>
+                  </DialogHeader>
+                  <Textarea
+                    value={editedContent}
+                    onChange={(e) => setEditedContent(e.target.value)}
+                    rows={6}
+                  />
+                  <DialogFooter>
+                    <Button onClick={handleSaveEdit} disabled={isPending}>Zapisz</Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+              <Button size="sm" variant="outline" onClick={() => handleDecision("REJECTED")} disabled={isPending}>
+                <X className="size-4" /> Odrzuć
+              </Button>
+            </div>
+          )}
+
           <p className="text-xs text-muted-foreground">
             Model: {suggestion.model} · {suggestion.latencyMs}ms
-            {suggestion.inputTokens &&
-              ` · ${suggestion.inputTokens + (suggestion.outputTokens ?? 0)} tokenów`}
           </p>
         </CardContent>
       )}
