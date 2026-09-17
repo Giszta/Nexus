@@ -11,6 +11,7 @@ import {
   Settings,
   Search,
   Inbox,
+  TrendingUp,
 } from "lucide-react";
 
 const navItems = [
@@ -21,6 +22,7 @@ const navItems = [
   { label: "Settings", href: "/settings", icon: Settings, roles: ["ADMIN", "MANAGER"] },
   { label: "Search KB", href: "/knowledge-base/search", icon: Search, roles: ["ADMIN", "MANAGER", "AGENT", "VIEWER"] },
   { label: "AI Inbox", href: "/ai-inbox", icon: Inbox, roles: ["ADMIN", "MANAGER", "AGENT"] },
+  { label: "AI Performance", href: "/ai-performance", icon: TrendingUp, roles: ["ADMIN", "MANAGER"] },
 ];
 
 export function NavLinks({
