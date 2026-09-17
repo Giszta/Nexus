@@ -309,3 +309,19 @@ export async function reviewSuggestion(
 
   revalidatePath(`/tickets/${ticketId}`);
 }
+
+export async function extractTicketDraft(transcript: string) {
+  const session = await getServerSession();
+  if (!session) redirect("/login");
+
+  const role = (session.user as { role?: string }).role;
+  if (role === "VIEWER") {
+    throw new Error("Brak uprawnień do tworzenia zgłoszeń.");
+  }
+
+  if (!transcript || transcript.trim().length < 10) {
+    throw new Error("Transkrypcja jest zbyt krótka, żeby wyodrębnić z niej sensowne dane.");
+  }
+
+  return AIService.extractTicketDraft(transcript);
+}

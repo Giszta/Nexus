@@ -33,4 +33,13 @@ export interface AIProvider {
     description: string,
     context: ContextChunk[]
   ): Promise<SuggestionResult>;
+  extractTicketDraft(transcript: string): Promise<VoiceExtractionResult>;
 }
+  
+export type VoiceExtractionResult = {
+  title: string;
+  category: TicketCategory;
+  priority: TicketPriority;
+  description: string;
+  suggestedAction: string;
+};

@@ -1,5 +1,5 @@
 import { responseSuggestionPrompt } from "@/prompts/response-suggestion";
-import type { AIProvider, ClassificationResult, SuggestionResult } from "./types";
+import type { AIProvider, ClassificationResult, ContextChunk, SuggestionResult, VoiceExtractionResult } from "./types";
 import { ticketClassificationPrompt } from "@/prompts/ticket-classification";
 
 export class MockAIProvider implements AIProvider {
@@ -54,6 +54,16 @@ export class MockAIProvider implements AIProvider {
     model: "mock-provider",
     promptVersion: responseSuggestionPrompt.version,
     latencyMs: Date.now() - start,
+  };
+}
+async extractTicketDraft(transcript: string): Promise<VoiceExtractionResult> {
+  await new Promise((resolve) => setTimeout(resolve, 300));
+  return {
+    title: transcript.slice(0, 60) || "Zgłoszenie głosowe",
+    category: "OTHER",
+    priority: "MEDIUM",
+    description: transcript,
+    suggestedAction: "[MockAIProvider] Sprawdź szczegóły z agentem.",
   };
 }
 }
