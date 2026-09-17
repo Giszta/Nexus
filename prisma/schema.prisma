@@ -207,6 +207,7 @@ enum DocumentStatus {
 enum DocumentFileType {
   TXT
   MARKDOWN
+  PDF
 }
 
 model KnowledgeDocument {
