@@ -1,7 +1,8 @@
 import Anthropic from "@anthropic-ai/sdk";
-import type { AIProvider, ClassificationResult, ContextChunk, SuggestionResult } from "./types";
+import type { AIProvider, ClassificationResult, ContextChunk, SuggestionResult, VoiceExtractionResult } from "./types";
 import { ticketClassificationPrompt } from "@/prompts/ticket-classification";
 import { responseSuggestionPrompt } from "@/prompts/response-suggestion";
+import { voiceExtractionPrompt } from "@/prompts/voice-extraction";
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -99,5 +100,43 @@ async suggestResponse(
     inputTokens: response.usage.input_tokens,
     outputTokens: response.usage.output_tokens,
   };
+}
+async extractTicketDraft(transcript: string): Promise<VoiceExtractionResult> {
+  const response = await client.messages.create({
+    model: "claude-haiku-4-5-20251001",
+    max_tokens: 500,
+    system: voiceExtractionPrompt.buildSystemPrompt(),
+    messages: [
+      { role: "user", content: voiceExtractionPrompt.buildUserPrompt(transcript) },
+    ],
+    tools: [
+      {
+        name: "extract_ticket_draft",
+        description: "Zwraca strukturalny szkic zgłoszenia.",
+        input_schema: {
+          type: "object",
+          properties: {
+            title: { type: "string" },
+            category: {
+              type: "string",
+              enum: ["HARDWARE", "SOFTWARE", "BILLING", "ACCOUNT", "OTHER"],
+            },
+            priority: { type: "string", enum: ["LOW", "MEDIUM", "HIGH"] },
+            description: { type: "string" },
+            suggestedAction: { type: "string" },
+          },
+          required: ["title", "category", "priority", "description", "suggestedAction"],
+        },
+      },
+    ],
+    tool_choice: { type: "tool", name: "extract_ticket_draft" },
+  });
+
+  const toolUseBlock = response.content.find((block) => block.type === "tool_use");
+  if (!toolUseBlock || toolUseBlock.type !== "tool_use") {
+    throw new Error("Model nie zwrócił oczekiwanej struktury danych.");
+  }
+
+  return toolUseBlock.input as VoiceExtractionResult;
 }
 }

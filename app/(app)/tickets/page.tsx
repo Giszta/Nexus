@@ -60,6 +60,9 @@ export default async function TicketsPage({
         <Button asChild>
           <Link href="/tickets/new">Nowy ticket</Link>
         </Button>
+        <Button asChild variant="outline">
+  <Link href="/tickets/voice">🎤 Nowy ticket głosowy</Link>
+</Button>
       </div>
 
       {tickets.length === 0 ? (
