@@ -26,6 +26,8 @@ model User {
   knowledgeDocuments KnowledgeDocument[]
 
   @@map("user")
+
+  aiFeedback AIFeedback[]
 }
 
 model Session {
@@ -119,6 +121,8 @@ model Ticket {
 
   analyses AIAnalysis[]
   suggestions AISuggestion[]
+
+  feedback AIFeedback[]
 }
 
 enum TicketActivityType {
@@ -126,6 +130,7 @@ enum TicketActivityType {
   STATUS_CHANGED
   ASSIGNED
   PRIORITY_CHANGED
+  CATEGORY_CHANGED
 }
 
 model TicketActivity {
@@ -254,4 +259,39 @@ model AISuggestionSource {
 
   @@index([suggestionId])
   @@map("ai_suggestion_source")
+}
+
+enum FeedbackDecision {
+  ACCEPTED
+  EDITED
+  REJECTED
+}
+
+enum FeedbackTargetType {
+  ANALYSIS
+  SUGGESTION
+}
+
+model AIFeedback {
+  id             String             @id @default(cuid())
+
+  ticketId       String
+  ticket         Ticket             @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  targetType     FeedbackTargetType
+  targetId       String
+
+  decision       FeedbackDecision
+  editedCategory TicketCategory?
+  editedPriority TicketPriority?
+  editedContent  String?
+
+  reviewedById   String
+  reviewedBy     User               @relation(fields: [reviewedById], references: [id])
+
+  createdAt      DateTime           @default(now())
+
+  @@index([ticketId])
+  @@index([targetType, targetId])
+  @@map("ai_feedback")
 }

@@ -7,13 +7,15 @@ import { TicketRepository } from "@/repositories/ticket-repository";
 import { createTicketSchema } from "@/schemas/ticket";
 
 import { prisma } from "@/lib/prisma";
-import type { TicketStatus } from "@prisma/client";
+import type { TicketPriority, TicketStatus } from "@prisma/client";
 import { UserRepository } from "@/repositories/user-repository";
 
 import { AIService } from "@/lib/ai/ai-service";
 
 import { EmbeddingService } from "@/lib/ai/embedding-service";
 import { KnowledgeChunkRepository } from "@/repositories/knowledge-chunk-repository";
+
+import type { TicketCategory } from "@prisma/client";
 
 export async function createTicket(formData: FormData) {
   const session = await getServerSession();
@@ -201,6 +203,108 @@ export async function generateSuggestion(ticketId: string) {
         })),
       });
     }
+  });
+
+  revalidatePath(`/tickets/${ticketId}`);
+}
+
+export async function reviewAnalysis(
+  ticketId: string,
+  analysisId: string,
+  decision: "ACCEPTED" | "EDITED" | "REJECTED",
+  editedCategory?: TicketCategory,
+  editedPriority?: TicketPriority
+) {
+  const session = await getServerSession();
+  if (!session) redirect("/login");
+
+  const role = (session.user as { role?: string }).role;
+  if (role === "VIEWER") {
+    throw new Error("Brak uprawnień do przeglądu sugestii AI.");
+  }
+
+  const analysis = await prisma.aIAnalysis.findUnique({ where: { id: analysisId } });
+  if (!analysis) throw new Error("Nie znaleziono analizy.");
+
+  const ticket = await TicketRepository.findById(ticketId);
+  if (!ticket) throw new Error("Nie znaleziono ticketu.");
+
+  const finalCategory = decision === "EDITED" ? editedCategory : analysis.category;
+  const finalPriority = decision === "EDITED" ? editedPriority : analysis.priority;
+
+  await prisma.$transaction(async (tx) => {
+    await tx.aIFeedback.create({
+      data: {
+        ticketId,
+        targetType: "ANALYSIS",
+        targetId: analysisId,
+        decision,
+        editedCategory: decision === "EDITED" ? editedCategory : undefined,
+        editedPriority: decision === "EDITED" ? editedPriority : undefined,
+        reviewedById: session.user.id,
+      },
+    });
+
+    if (decision === "REJECTED") return;
+
+    const updates: { category?: TicketCategory; priority?: TicketPriority } = {};
+    if (finalCategory && finalCategory !== ticket.category) updates.category = finalCategory;
+    if (finalPriority && finalPriority !== ticket.priority) updates.priority = finalPriority;
+
+    if (Object.keys(updates).length === 0) return;
+
+    await tx.ticket.update({ where: { id: ticketId }, data: updates });
+
+    if (updates.category) {
+      await tx.ticketActivity.create({
+        data: {
+          ticketId,
+          actorId: session.user.id,
+          type: "CATEGORY_CHANGED",
+          fromValue: ticket.category ?? "brak",
+          toValue: updates.category,
+        },
+      });
+    }
+    if (updates.priority) {
+      await tx.ticketActivity.create({
+        data: {
+          ticketId,
+          actorId: session.user.id,
+          type: "PRIORITY_CHANGED",
+          fromValue: ticket.priority ?? "brak",
+          toValue: updates.priority,
+        },
+      });
+    }
+  });
+
+  revalidatePath(`/tickets/${ticketId}`);
+}
+
+export async function reviewSuggestion(
+  ticketId: string,
+  suggestionId: string,
+  decision: "ACCEPTED" | "EDITED" | "REJECTED",
+  editedContent?: string
+) {
+  const session = await getServerSession();
+  if (!session) redirect("/login");
+
+  const role = (session.user as { role?: string }).role;
+  if (role === "VIEWER") {
+    throw new Error("Brak uprawnień do przeglądu sugestii AI.");
+  }
+
+  await prisma.aIFeedback.create({
+    data: {
+      ticketId,
+      targetType: "SUGGESTION",
+      targetId: suggestionId,
+      decision,
+      editedContent: decision === "EDITED" ? editedContent : undefined,
+      reviewedById: session.user.id,
+    },
   });
 
   revalidatePath(`/tickets/${ticketId}`);
