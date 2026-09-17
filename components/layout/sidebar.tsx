@@ -10,6 +10,7 @@ import {
   BarChart3,
   Settings,
   Search,
+  Inbox,
 } from "lucide-react";
 
 const navItems = [
@@ -19,6 +20,7 @@ const navItems = [
   { label: "Analytics", href: "/analytics", icon: BarChart3, roles: ["ADMIN", "MANAGER", "AGENT", "VIEWER"] },
   { label: "Settings", href: "/settings", icon: Settings, roles: ["ADMIN", "MANAGER"] },
   { label: "Search KB", href: "/knowledge-base/search", icon: Search, roles: ["ADMIN", "MANAGER", "AGENT", "VIEWER"] },
+  { label: "AI Inbox", href: "/ai-inbox", icon: Inbox, roles: ["ADMIN", "MANAGER", "AGENT"] },
 ];
 
 export function NavLinks({

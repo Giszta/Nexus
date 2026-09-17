@@ -65,4 +65,38 @@ async create(data: {
     return ticket;
   });
 },
+async findPendingReview() {
+  const tickets = await prisma.ticket.findMany({
+    where: {
+      OR: [{ analyses: { some: {} } }, { suggestions: { some: {} } }],
+    },
+    include: {
+      analyses: { orderBy: { createdAt: "desc" }, take: 1 },
+      suggestions: { orderBy: { createdAt: "desc" }, take: 1 },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  const allFeedback = await prisma.aIFeedback.findMany({
+    select: { targetId: true },
+  });
+  const reviewedIds = new Set(allFeedback.map((f) => f.targetId));
+
+  return tickets
+    .map((ticket) => {
+      const latestAnalysis = ticket.analyses[0] ?? null;
+      const latestSuggestion = ticket.suggestions[0] ?? null;
+
+      const pendingAnalysis =
+        latestAnalysis && !reviewedIds.has(latestAnalysis.id) ? latestAnalysis : null;
+      const pendingSuggestion =
+        latestSuggestion && !reviewedIds.has(latestSuggestion.id) ? latestSuggestion : null;
+
+      if (!pendingAnalysis && !pendingSuggestion) return null;
+
+      return { ticket, pendingAnalysis, pendingSuggestion };
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== null);
+}
 };
+
