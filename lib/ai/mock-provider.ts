@@ -38,13 +38,19 @@ export class MockAIProvider implements AIProvider {
   }
   async suggestResponse(
   title: string,
-  description: string
+  description: string,
+  context: ContextChunk[]
 ): Promise<SuggestionResult> {
   const start = Date.now();
   await new Promise((resolve) => setTimeout(resolve, 300));
 
+  const grounded =
+    context.length > 0
+      ? ` Znaleziono ${context.length} pasujący(e) fragment(y) dokumentacji.`
+      : " Brak pasującej dokumentacji — wymaga sprawdzenia przez zespół.";
+
   return {
-    content: `Dziękujemy za zgłoszenie "${title}". Przeanalizujemy opisany problem i wrócimy do Ciebie z odpowiedzią najszybciej, jak to możliwe. [Odpowiedź wygenerowana przez MockAIProvider]`,
+    content: `Dziękujemy za zgłoszenie "${title}".${grounded} [MockAIProvider]`,
     model: "mock-provider",
     promptVersion: responseSuggestionPrompt.version,
     latencyMs: Date.now() - start,

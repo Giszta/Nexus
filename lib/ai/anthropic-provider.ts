@@ -1,5 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
-import type { AIProvider, ClassificationResult, SuggestionResult } from "./types";
+import type { AIProvider, ClassificationResult, ContextChunk, SuggestionResult } from "./types";
 import { ticketClassificationPrompt } from "@/prompts/ticket-classification";
 import { responseSuggestionPrompt } from "@/prompts/response-suggestion";
 
@@ -67,26 +67,26 @@ const result = toolUseBlock.input as {
       outputTokens: response.usage.output_tokens,
     };
   }
-  async suggestResponse(
+async suggestResponse(
   title: string,
-  description: string
+  description: string,
+  context: ContextChunk[]
 ): Promise<SuggestionResult> {
   const start = Date.now();
 
   const response = await client.messages.create({
     model: "claude-haiku-4-5-20251001",
-    max_tokens: 300,
+    max_tokens: 400,
     system: responseSuggestionPrompt.buildSystemPrompt(),
     messages: [
       {
         role: "user",
-        content: responseSuggestionPrompt.buildUserPrompt(title, description),
+        content: responseSuggestionPrompt.buildUserPrompt(title, description, context),
       },
     ],
   });
 
   const textBlock = response.content.find((block) => block.type === "text");
-
   if (!textBlock || textBlock.type !== "text") {
     throw new Error("Model nie zwrócił odpowiedzi tekstowej.");
   }

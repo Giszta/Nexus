@@ -12,6 +12,8 @@ import { UserRepository } from "@/repositories/user-repository";
 
 import { AIService } from "@/lib/ai/ai-service";
 
+import { EmbeddingService } from "@/lib/ai/embedding-service";
+import { KnowledgeChunkRepository } from "@/repositories/knowledge-chunk-repository";
 
 export async function createTicket(formData: FormData) {
   const session = await getServerSession();
@@ -144,6 +146,8 @@ export async function analyzeTicket(ticketId: string) {
   revalidatePath(`/tickets/${ticketId}`);
 }
 
+const RELEVANCE_THRESHOLD = 0.5;
+
 export async function generateSuggestion(ticketId: string) {
   const session = await getServerSession();
   if (!session) redirect("/login");
@@ -156,18 +160,47 @@ export async function generateSuggestion(ticketId: string) {
   const ticket = await TicketRepository.findById(ticketId);
   if (!ticket) throw new Error("Nie znaleziono ticketu.");
 
-  const result = await AIService.suggestResponse(ticket.title, ticket.description);
+  const query = `${ticket.title}\n${ticket.description}`;
+  const queryEmbedding = await EmbeddingService.embedQuery(query);
+  const matches = await KnowledgeChunkRepository.searchSimilar(queryEmbedding, 3);
 
-  await prisma.aISuggestion.create({
-    data: {
-      ticketId,
-      content: result.content,
-      model: result.model,
-      promptVersion: result.promptVersion,
-      latencyMs: result.latencyMs,
-      inputTokens: result.inputTokens,
-      outputTokens: result.outputTokens,
-    },
+  const relevantMatches = matches.filter((m) => m.distance < RELEVANCE_THRESHOLD);
+
+  const context = relevantMatches.map((m) => ({
+    documentTitle: m.documentTitle,
+    content: m.content,
+  }));
+
+  const result = await AIService.suggestResponse(
+    ticket.title,
+    ticket.description,
+    context
+  );
+
+  await prisma.$transaction(async (tx) => {
+    const suggestion = await tx.aISuggestion.create({
+      data: {
+        ticketId,
+        content: result.content,
+        model: result.model,
+        promptVersion: result.promptVersion,
+        latencyMs: result.latencyMs,
+        inputTokens: result.inputTokens,
+        outputTokens: result.outputTokens,
+      },
+    });
+
+    if (relevantMatches.length > 0) {
+      await tx.aISuggestionSource.createMany({
+        data: relevantMatches.map((m) => ({
+          suggestionId: suggestion.id,
+          documentId: m.documentId,
+          documentTitle: m.documentTitle,
+          snippet: m.content.slice(0, 200),
+          distance: m.distance,
+        })),
+      });
+    }
   });
 
   revalidatePath(`/tickets/${ticketId}`);
