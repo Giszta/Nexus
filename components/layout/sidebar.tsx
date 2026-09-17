@@ -17,7 +17,7 @@ const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, roles: ["ADMIN", "MANAGER", "AGENT", "VIEWER"] },
   { label: "Tickets", href: "/tickets", icon: Ticket, roles: ["ADMIN", "MANAGER", "AGENT", "VIEWER"] },
   { label: "Knowledge Base", href: "/knowledge-base", icon: BookOpen, roles: ["ADMIN", "MANAGER", "AGENT", "VIEWER"] },
-  { label: "Analytics", href: "/analytics", icon: BarChart3, roles: ["ADMIN", "MANAGER", "AGENT", "VIEWER"] },
+  { label: "Analytics", href: "/analytics", icon: BarChart3, roles: ["ADMIN", "MANAGER"] },
   { label: "Settings", href: "/settings", icon: Settings, roles: ["ADMIN", "MANAGER"] },
   { label: "Search KB", href: "/knowledge-base/search", icon: Search, roles: ["ADMIN", "MANAGER", "AGENT", "VIEWER"] },
   { label: "AI Inbox", href: "/ai-inbox", icon: Inbox, roles: ["ADMIN", "MANAGER", "AGENT"] },
