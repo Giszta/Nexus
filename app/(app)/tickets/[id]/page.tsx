@@ -43,6 +43,7 @@ const [ticket, activities, assignableUsers, latestAnalysis, latestSuggestion] =
     prisma.aISuggestion.findFirst({
       where: { ticketId: id },
       orderBy: { createdAt: "desc" },
+      include: { sources: true },
     }),
   ]);
 

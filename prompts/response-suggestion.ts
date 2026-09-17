@@ -1,21 +1,31 @@
+type ContextChunk = { documentTitle: string; content: string };
+
 export const responseSuggestionPrompt = {
   name: "response-suggestion",
-  version: "v1",
+  version: "v2",
   purpose:
-    "Generuje sugerowaną, uprzejmą odpowiedź dla klienta na podstawie treści zgłoszenia.",
-  buildSystemPrompt: () => `Jesteś asystentem wsparcia technicznego. Na podstawie zgłoszenia klienta napisz krótką, uprzejmą, profesjonalną odpowiedź po polsku.
-Odpowiedź powinna:
-- potwierdzać zrozumienie problemu,
-- wskazywać następny krok (np. "przekażemy sprawę do technika", "sprawdzimy to i wrócimy z odpowiedzią"),
-- NIE obiecywać konkretnych terminów, których nie znasz.
+    "Generuje sugerowaną odpowiedź dla klienta, ugruntowaną w dostarczonej dokumentacji (RAG), z uczciwym przyznaniem braku informacji, gdy kontekst jest niewystarczający.",
+  buildSystemPrompt: () => `Jesteś asystentem wsparcia technicznego. Otrzymasz zgłoszenie klienta oraz (opcjonalnie) fragmenty dokumentacji wewnętrznej.
 
-Napisz WYŁĄCZNIE treść odpowiedzi, bez nagłówków ani dodatkowych komentarzy.`,
-  buildUserPrompt: (title: string, description: string) =>
-    `Tytuł zgłoszenia: ${title}\n\nOpis: ${description}`,
+ZASADY:
+1. Jeśli dokumentacja zawiera informacje odpowiadające na problem klienta, oprzyj odpowiedź WYŁĄCZNIE na tych informacjach.
+2. Jeśli dokumentacja NIE zawiera odpowiedzi na problem (albo nie została dostarczona), NIE zgaduj i NIE wymyślaj rozwiązania. Napisz uczciwie, że sprawa wymaga sprawdzenia przez zespół techniczny, i zadaj pomocne pytania diagnostyczne.
+3. Nigdy nie obiecuj konkretnych terminów, których nie znasz.
+4. Pisz po polsku, uprzejmie i profesjonalnie.
+
+Napisz WYŁĄCZNIE treść odpowiedzi, bez nagłówków ani komentarzy.`,
+  buildUserPrompt: (
+    title: string,
+    description: string,
+    context: ContextChunk[]
+  ) => {
+    const contextSection =
+      context.length > 0
+        ? `Fragmenty dokumentacji wewnętrznej:\n\n${context
+            .map((c, i) => `[Źródło ${i + 1}: ${c.documentTitle}]\n${c.content}`)
+            .join("\n\n---\n\n")}\n\n`
+        : "Brak pasującej dokumentacji wewnętrznej dla tego zgłoszenia.\n\n";
+
+    return `${contextSection}Zgłoszenie klienta:\nTytuł: ${title}\nOpis: ${description}`;
+  },
 };
-
-/*Known issue:
-Prompt "response-suggestion" v1 czasem generuje miękkie zobowiązania
-czasowe ("w ciągu najbliższych godzin roboczych") mimo wyraźnej
-instrukcji unikania obietnic terminów. Do doprecyzowania w v2
-(np. explicit przykład złej/dobrej odpowiedzi w prompcie).*/

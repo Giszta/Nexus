@@ -12,13 +12,6 @@ export type ClassificationResult = {
   outputTokens?: number;
 };
 
-export interface AIProvider {
-  classifyTicket(
-    title: string,
-    description: string
-  ): Promise<ClassificationResult>;
-}
-
 export type SuggestionResult = {
   content: string;
   model: string;
@@ -28,6 +21,8 @@ export type SuggestionResult = {
   outputTokens?: number;
 };
 
+export type ContextChunk = { documentTitle: string; content: string };
+
 export interface AIProvider {
   classifyTicket(
     title: string,
@@ -35,6 +30,7 @@ export interface AIProvider {
   ): Promise<ClassificationResult>;
   suggestResponse(
     title: string,
-    description: string
+    description: string,
+    context: ContextChunk[]
   ): Promise<SuggestionResult>;
 }

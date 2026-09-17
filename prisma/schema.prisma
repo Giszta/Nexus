@@ -185,6 +185,8 @@ model AISuggestion {
 
   createdAt     DateTime @default(now())
 
+  sources AISuggestionSource[]
+  
   @@index([ticketId])
   @@map("ai_suggestion")
 }
@@ -235,4 +237,21 @@ model KnowledgeChunk {
 
   @@index([documentId])
   @@map("knowledge_chunk")
+}
+
+model AISuggestionSource {
+  id            String       @id @default(cuid())
+
+  suggestionId  String
+  suggestion    AISuggestion @relation(fields: [suggestionId], references: [id], onDelete: Cascade)
+
+  documentId    String
+  documentTitle String
+  snippet       String
+  distance      Float
+
+  createdAt     DateTime     @default(now())
+
+  @@index([suggestionId])
+  @@map("ai_suggestion_source")
 }
