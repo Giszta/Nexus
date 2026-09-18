@@ -51,7 +51,7 @@ jobs:
 
       - name: Włącz rozszerzenie pgvector
         run: PGPASSWORD=nexus_test_password psql -h localhost -U nexus -d nexus_test -c "CREATE EXTENSION IF NOT EXISTS vector;"
-        
+
       - name: Włącz rozszerzenie pgvector
         run: PGPASSWORD=nexus_test_password psql -h localhost -U nexus -d nexus_test -c "CREATE EXTENSION IF NOT EXISTS vector;"
 
@@ -62,8 +62,8 @@ jobs:
         run: npm run lint
 
       - name: Sprawdzenie typów
-        run: npx tsc --noEmit
-
+        run: npx next typegen && npx tsc --noEmit
+        
       - name: Testy jednostkowe i komponentowe
         run: npm run test
 
