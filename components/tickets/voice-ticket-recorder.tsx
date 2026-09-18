@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { Mic, Square, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +16,32 @@ import {
 import { extractTicketDraft, createTicket } from "@/app/(app)/tickets/actions";
 import type { TicketCategory, TicketPriority } from "@prisma/client";
 
+type SpeechRecognitionResult = {
+  transcript: string;
+};
+
+type SpeechRecognitionEvent = {
+  results: { [index: number]: [SpeechRecognitionResult]; length: number };
+};
+
+type SpeechRecognitionInstance = {
+  lang: string;
+  continuous: boolean;
+  interimResults: boolean;
+  onresult: (event: SpeechRecognitionEvent) => void;
+  onerror: () => void;
+  start: () => void;
+  stop: () => void;
+};
+
+type SpeechRecognitionConstructor = new () => SpeechRecognitionInstance;
+
+declare global {
+  interface Window {
+    SpeechRecognition?: SpeechRecognitionConstructor;
+    webkitSpeechRecognition?: SpeechRecognitionConstructor;
+  }
+}
 type Draft = {
   title: string;
   category: TicketCategory;
@@ -35,18 +60,19 @@ export function VoiceTicketRecorder() {
   const [transcript, setTranscript] = useState("");
   const [draft, setDraft] = useState<Draft | null>(null);
   const [isPending, startTransition] = useTransition();
-  const recognitionRef = useRef<any>(null);
-  const router = useRouter();
+const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
+
 
   function startRecording() {
-    const SpeechRecognition =
-      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    const recognition = new SpeechRecognition();
+
+const SpeechRecognitionCtor = window.SpeechRecognition ?? window.webkitSpeechRecognition;
+if (!SpeechRecognitionCtor) return;
+const recognition = new SpeechRecognitionCtor();
     recognition.lang = "pl-PL";
     recognition.continuous = true;
     recognition.interimResults = false;
 
-    recognition.onresult = (event: any) => {
+recognition.onresult = (event: SpeechRecognitionEvent) => {
       let text = "";
       for (let i = 0; i < event.results.length; i++) {
         text += event.results[i][0].transcript + " ";

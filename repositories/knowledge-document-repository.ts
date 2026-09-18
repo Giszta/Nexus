@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import type { DocumentFileType, DocumentStatus } from "@prisma/client";
+import type { DocumentFileType } from "@prisma/client";
 
 type ListParams = {
   page?: number;
