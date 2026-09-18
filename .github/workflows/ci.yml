@@ -33,9 +33,9 @@ jobs:
       AI_PROVIDER: mock
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: 24
           cache: npm
@@ -63,7 +63,7 @@ jobs:
 
       - name: Sprawdzenie typów
         run: npx next typegen && npx tsc --noEmit
-        
+
       - name: Testy jednostkowe i komponentowe
         run: npm run test
 
