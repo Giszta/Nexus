@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: nexus
+          POSTGRES_PASSWORD: nexus_test_password
+          POSTGRES_DB: nexus_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://nexus:nexus_test_password@localhost:5432/nexus_test
+      BETTER_AUTH_SECRET: ci-test-secret-not-for-production-use
+      BETTER_AUTH_URL: http://localhost:3000
+      NEXT_PUBLIC_BETTER_AUTH_URL: http://localhost:3000
+      AI_PROVIDER: mock
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Zainstaluj zależności
+        run: npm ci
+
+      - name: Włącz rozszerzenie pgvector
+        run: PGPASSWORD=nexus_test_password psql -h localhost -U nexus -d nexus_test -c "CREATE EXTENSION IF NOT EXISTS vector;"
+
+      - name: Zastosuj migracje bazy danych
+        run: npx prisma migrate deploy
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Sprawdzenie typów
+        run: npx tsc --noEmit
+
+      - name: Testy jednostkowe i komponentowe
+        run: npm run test
+
+      - name: Build produkcyjny
+        run: npm run build
+
+      - name: Zainstaluj przeglądarki Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Zasiej dane testowe
+        run: npm run seed
+
+      - name: Testy E2E
+        run: npm run test:e2e
