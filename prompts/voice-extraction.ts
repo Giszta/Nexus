@@ -15,5 +15,7 @@ Wyodrębnij:
 Transkrypcja może zawierać potknięcia językowe typowe dla mowy — zignoruj je i wyciągnij sens.
 
 Zwróć wynik WYŁĄCZNIE przez wywołanie narzędzia extract_ticket_draft.`,
-  buildUserPrompt: (transcript: string) => `Transkrypcja: ${transcript}`,
+buildUserPrompt: (transcript: string) => `<transkrypcja>
+${transcript}
+</transkrypcja>`,
 };

@@ -19,13 +19,13 @@ Napisz WYŁĄCZNIE treść odpowiedzi, bez nagłówków ani komentarzy.`,
     description: string,
     context: ContextChunk[]
   ) => {
-    const contextSection =
-      context.length > 0
-        ? `Fragmenty dokumentacji wewnętrznej:\n\n${context
-            .map((c, i) => `[Źródło ${i + 1}: ${c.documentTitle}]\n${c.content}`)
-            .join("\n\n---\n\n")}\n\n`
-        : "Brak pasującej dokumentacji wewnętrznej dla tego zgłoszenia.\n\n";
+    const contextSection = context.length > 0
+    ? `<dokumentacja_wewnetrzna>\n${context.map((c, i) => `[Źródło ${i + 1}: ${c.documentTitle}]\n${c.content}`).join("\n\n---\n\n")}\n</dokumentacja_wewnetrzna>\n\n`
+    : "Brak pasującej dokumentacji wewnętrznej dla tego zgłoszenia.\n\n";
 
-    return `${contextSection}Zgłoszenie klienta:\nTytuł: ${title}\nOpis: ${description}`;
+  return `${contextSection}<zgloszenie_klienta>
+Tytuł: ${title}
+Opis: ${description}
+</zgloszenie_klienta>`;
   },
 };
