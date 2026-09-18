@@ -16,6 +16,7 @@ import { EmbeddingService } from "@/lib/ai/embedding-service";
 import { KnowledgeChunkRepository } from "@/repositories/knowledge-chunk-repository";
 
 import type { TicketCategory } from "@prisma/client";
+import { AI_RATE_LIMIT, checkRateLimit } from "@/lib/rate-limit";
 
 export async function createTicket(formData: FormData) {
   const session = await getServerSession();
@@ -125,6 +126,12 @@ export async function analyzeTicket(ticketId: string) {
     throw new Error("Brak uprawnień do analizy AI.");
   }
 
+    const rateLimitResult = checkRateLimit(`ai:${session.user.id}`, AI_RATE_LIMIT);
+  if (!rateLimitResult.allowed) {
+    throw new Error(
+      `Zbyt wiele żądań AI. Spróbuj ponownie za ${rateLimitResult.retryAfterSeconds}s.`
+    );
+  }
   const ticket = await TicketRepository.findById(ticketId);
   if (!ticket) throw new Error("Nie znaleziono ticketu.");
 
@@ -158,7 +165,12 @@ export async function generateSuggestion(ticketId: string) {
   if (role === "VIEWER") {
     throw new Error("Brak uprawnień do generowania sugestii AI.");
   }
-
+  const rateLimitResult = checkRateLimit(`ai:${session.user.id}`, AI_RATE_LIMIT);
+  if (!rateLimitResult.allowed) {
+    throw new Error(
+      `Zbyt wiele żądań AI. Spróbuj ponownie za ${rateLimitResult.retryAfterSeconds}s.`
+    );
+  }
   const ticket = await TicketRepository.findById(ticketId);
   if (!ticket) throw new Error("Nie znaleziono ticketu.");
 
@@ -318,7 +330,12 @@ export async function extractTicketDraft(transcript: string) {
   if (role === "VIEWER") {
     throw new Error("Brak uprawnień do tworzenia zgłoszeń.");
   }
-
+  const rateLimitResult = checkRateLimit(`ai:${session.user.id}`, AI_RATE_LIMIT);
+  if (!rateLimitResult.allowed) {
+    throw new Error(
+      `Zbyt wiele żądań AI. Spróbuj ponownie za ${rateLimitResult.retryAfterSeconds}s.`
+    );
+  }
   if (!transcript || transcript.trim().length < 10) {
     throw new Error("Transkrypcja jest zbyt krótka, żeby wyodrębnić z niej sensowne dane.");
   }
