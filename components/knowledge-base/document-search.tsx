@@ -23,6 +23,7 @@ export function DocumentSearch({ initialValue }: { initialValue?: string }) {
     }, 300);
 
     return () => clearTimeout(timeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- celowo tylko `value`: router/searchParams w zależnościach spowodowałyby pętlę odświeżania
   }, [value]);
 
   return (

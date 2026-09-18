@@ -22,7 +22,7 @@ async function seed() {
         },
       });
       console.log(`✔ Utworzono: ${user.email}`);
-    } catch (error) {
+    } catch {
       console.log(`⚠ Pominięto ${user.email} (prawdopodobnie już istnieje)`);
     }
   }

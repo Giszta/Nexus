@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "seed": "tsx --env-file=.env --env-file=.env.local scripts/seed-users.ts",
+    "seed": "tsx --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/seed-users.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
