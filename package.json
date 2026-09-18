@@ -10,7 +10,8 @@
     "seed": "tsx --env-file=.env --env-file=.env.local scripts/seed-users.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "analyze": "ANALYZE=true next build"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.126.0",
