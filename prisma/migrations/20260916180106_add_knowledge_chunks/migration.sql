@@ -1,4 +1,6 @@
 -- CreateTable
+CREATE EXTENSION IF NOT EXISTS vector;
+
 CREATE TABLE "knowledge_chunk" (
     "id" TEXT NOT NULL,
     "content" TEXT NOT NULL,
