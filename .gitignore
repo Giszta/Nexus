@@ -49,3 +49,8 @@ dev.db
 .claude/skills/
 .windsurf/skills/
 skills-lock.json
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
