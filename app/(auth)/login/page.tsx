@@ -60,20 +60,32 @@ const isDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <Input
-            type="password"
-            placeholder="Hasło"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+          <div className="space-y-2">
+  <label htmlFor="email" className="text-sm font-medium">
+    Email
+  </label>
+  <Input
+    id="email"
+    type="email"
+    placeholder="np. jan@firma.pl"
+    value={email}
+    onChange={(e) => setEmail(e.target.value)}
+    required
+  />
+</div>
+<div className="space-y-2">
+  <label htmlFor="password" className="text-sm font-medium">
+    Hasło
+  </label>
+  <Input
+    id="password"
+    type="password"
+    placeholder="••••••••"
+    value={password}
+    onChange={(e) => setPassword(e.target.value)}
+    required
+  />
+</div>
           {error && (
             <p className="text-sm text-destructive">{error}</p>
           )}

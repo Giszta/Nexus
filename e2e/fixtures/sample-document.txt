@@ -1,0 +1,6 @@
+Instrukcja resetowania hasla
+
+Jesli uzytkownik zapomnial hasla, nalezy skorzystac z opcji
+"Zapomnialem hasla" na ekranie logowania. System wysle link
+resetujacy na zarejestrowany adres email. Link jest wazny
+przez 30 minut od momentu wygenerowania.
