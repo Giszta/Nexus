@@ -5,6 +5,7 @@ test("login → utworzenie ticketu → analiza AI → akceptacja → zmiana stat
 }) => {
   // 1. Logowanie
   await page.goto("/login");
+  await page.waitForLoadState("networkidle");
   await page.getByLabel("Email").fill("admin@nexus.dev");
   await page.getByLabel("Hasło").fill("Password123!");
   await page.getByRole("button", { name: "Zaloguj się" }).click();
