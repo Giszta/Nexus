@@ -25,7 +25,9 @@ test("login → utworzenie ticketu → analiza AI → akceptacja → zmiana stat
   // 3. Analiza AI (MockAIProvider — deterministyczna, szybka)
   await page.getByRole("button", { name: "Analizuj" }).click();
   await expect(page.getByText("Kategoria")).toBeVisible();
-  await expect(page.getByText(/OTHER|SOFTWARE|HARDWARE|BILLING|ACCOUNT/)).toBeVisible();
+await expect(
+  page.locator("p.font-medium").filter({ hasText: /^(OTHER|SOFTWARE|HARDWARE|BILLING|ACCOUNT)$/ })
+).toBeVisible();
 
   // 4. Akceptacja sugestii AI
   await page.getByRole("button", { name: "Akceptuj" }).first().click();
