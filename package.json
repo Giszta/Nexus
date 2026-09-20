@@ -11,7 +11,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "analyze": "ANALYZE=true next build"
+    "analyze": "ANALYZE=true next build",
+    "seed:demo": "tsx --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/seed-demo-data.ts",
+    "backfill:suggestion-feedback": "tsx --env-file-if-exists=.env --env-file-if-exists=.env.local scripts/backfill-suggestion-feedback.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.126.0",
