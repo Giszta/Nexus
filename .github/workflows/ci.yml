@@ -43,14 +43,8 @@ jobs:
       - name: Zainstaluj zależności
         run: npm ci
 
-      - name: Zainstaluj zależności
-        run: npm ci
-
       - name: Wygeneruj klienta Prisma
         run: npx prisma generate
-
-      - name: Włącz rozszerzenie pgvector
-        run: PGPASSWORD=nexus_test_password psql -h localhost -U nexus -d nexus_test -c "CREATE EXTENSION IF NOT EXISTS vector;"
 
       - name: Włącz rozszerzenie pgvector
         run: PGPASSWORD=nexus_test_password psql -h localhost -U nexus -d nexus_test -c "CREATE EXTENSION IF NOT EXISTS vector;"
