@@ -41,33 +41,38 @@ export default async function TicketsPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex flex-wrap gap-2">
-  {statusFilters.map((filter) => (
-    <Button
-      key={filter.label}
-      asChild
-      variant={status === filter.value ? "default" : "outline"}
-      size="sm"
-    >
-      <Link href={filter.value ? `/tickets?status=${filter.value}` : "/tickets"}>
-        {filter.label}
-      </Link>
-    </Button>
-  ))}
+      <div className="space-y-4">
+  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <h1 className="text-2xl font-semibold">Tickets</h1>
+    <div className="flex flex-wrap gap-2">
+      <Button asChild variant="outline">
+        <Link href="/tickets/voice">🎤 Nowy ticket głosowy</Link>
+      </Button>
+      <Button asChild>
+        <Link href="/tickets/new">Nowy ticket</Link>
+      </Button>
+    </div>
+  </div>
+  <div className="flex flex-wrap gap-2">
+    {statusFilters.map((filter) => (
+      <Button
+        key={filter.label}
+        asChild
+        variant={status === filter.value ? "default" : "outline"}
+        size="sm"
+      >
+        <Link href={filter.value ? `/tickets?status=${filter.value}` : "/tickets"}>
+          {filter.label}
+        </Link>
+      </Button>
+    ))}
+  </div>
 </div>
-        <h1 className="text-2xl font-semibold">Tickets</h1>
-        <Button asChild>
-          <Link href="/tickets/new">Nowy ticket</Link>
-        </Button>
-        <Button asChild variant="outline">
-  <Link href="/tickets/voice">🎤 Nowy ticket głosowy</Link>
-</Button>
-      </div>
 
       {tickets.length === 0 ? (
         <p className="text-muted-foreground">Brak zgłoszeń do wyświetlenia.</p>
       ) : (
+        <div className="overflow-x-auto rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
@@ -99,6 +104,7 @@ export default async function TicketsPage({
             ))}
           </TableBody>
         </Table>
+        </div>
       )}
 
 <div className="flex items-center justify-between">

@@ -85,7 +85,7 @@ export default function HomePage() {
           </div>
 
           {/* Statystyki */}
-          <div className="grid grid-cols-3 gap-3 pt-10">
+          <div className="grid grid-cols-3 gap-3 lg:pt-10">
             <Card className="shadow-sm">
               <CardContent className="py-4 text-center">
                 <p className="text-xl font-semibold">77%</p>
