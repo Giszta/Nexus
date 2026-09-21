@@ -81,7 +81,7 @@ Aby móc Ci efektywnie pomóc, potrzebuję kilku dodatkowych informacji:
 <br />
 3. **Czy masz pewność, że wpisujesz dokładnie to samo hasło**, które ustawiłeś? (Zwróć uwagę na wielkość liter, spacje lub znaki specjalne)
 <br />
-4. **Czy próbowałeś już resetować hasło** za pomocą opcji "Zapomnialem hasła" dostępnej na ekranie logowania?
+4. **Czy próbowałeś już resetować hasło** za pomocą opcji &quot;Zapomniałem hasła&quot; dostępnej na ekranie logowania?
 <br />
 5. **Na jakim urządzeniu/przeglądarce próbujesz się zalogować?**
 <br />
