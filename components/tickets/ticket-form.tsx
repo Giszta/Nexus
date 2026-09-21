@@ -60,7 +60,7 @@ export function TicketForm() {
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <label className="text-sm font-medium">Priorytet</label>
           <Select name="priority">
